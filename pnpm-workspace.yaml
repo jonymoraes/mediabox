@@ -1,8 +1,0 @@
-onlyBuiltDependencies:
-  - '@nestjs/core'
-  - '@swc/core'
-  - cpu-features
-  - msgpackr-extract
-  - protobufjs
-  - sharp
-  - ssh2

@@ -1,6 +1,17 @@
 {
   "name": "mediabox",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "@swc/core",
+      "cpu-features",
+      "msgpackr-extract",
+      "protobufjs",
+      "sharp",
+      "ssh2"
+    ]
+  },
   "description": "Unified Media Storage Engine: A flexible intermediary and S3-compatible bridge. Seamlessly manage uploads, transcoding, and quotas across Local Storage, VPS, StorageBox, or Cloud Providers",
   "author": "jonymoraes",
   "private": false,
