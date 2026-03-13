@@ -1,5 +1,7 @@
 # MediaBox
 
+[![CI](https://github.com/jonymoraes/mediabox/actions/workflows/tests.yml/badge.svg)](https://github.com/jonymoraes/mediabox/actions/workflows/tests.yml)
+
 **Unified Media Storage Engine: A flexible intermediary and S3-compatible bridge.** Seamlessly manage uploads, transcoding, and quotas across **Local Storage, VPS, StorageBox, or Cloud Providers.**
 
 This API acts as a high-performance abstraction layer, allowing you to replace S3 with local infrastructure or bridge between multiple storage backends while providing real-time feedback.
