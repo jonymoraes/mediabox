@@ -32,12 +32,12 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        # Añadimos --ignore-workspace por si acaso queda rastro del archivo anterior
         run: pnpm install --no-frozen-lockfile --ignore-workspace
 
       - name: Run Tests
         run: pnpm test
         env:
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
           NODE_ENV: test
           REDIS_HOST: localhost
           REDIS_PORT: 6379
