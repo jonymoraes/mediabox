@@ -97,8 +97,8 @@ pnpm run start:prod
 The project includes a comprehensive suite of tests to ensure stability and correct behavior of the storage and processing logic.
 
 ```bash
-# Run all tests
-pnpm run test
+# Run all tests with coverage
+pnpm run test:full
 
 # Run tests in watch mode
 pnpm run test:watch
