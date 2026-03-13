@@ -1,0 +1,42 @@
+{
+  "status": {
+    "errors": {
+      "invalid": "El estado proporcionado no es válido."
+    }
+  },
+  "image": {
+    "messages": {
+      "on_queue": "image: Imagen en cola, procesando...",
+      "activated": "La imagen fué activada.",
+      "deleted": "La imagen fué eliminada."
+    },
+    "errors": {
+      "required": "image: La imagen es obligatoria.",
+      "invalid": "image: La imagen proporcionada no es válida.",
+      "transform_failed": "image: No se pudo procesar la imagen.",
+      "invalid_format": "image: El formato de imagen no está permitido.",
+      "too_large": "image: La imagen excede el tamaño máximo permitido.",
+      "empty_buffer": "El contenido de la imagen no puede estar vacío.",
+      "invalid_path": "La ruta de la imagen no es válida.",
+      "invalid_filename": "El nombre del archivo de imagen no es válido.",
+      "invalid_context": "image: El contexto de la imagen no es válido.",
+      "empty_context": "image: El contexto de la imagen es obligatorio."
+    }
+  },
+  "video": {
+    "messages": {
+      "on_queue": "video: Video en cola, procesando...",
+      "activated": "El video fué activado.",
+      "deleted": "El video fué eliminado."
+    },
+    "errors": {
+      "required": "video: El video es obligatorio.",
+      "invalid": "video: El video proporcionado no es válido.",
+      "transcode_failed": "video: El procesamiento del video ha fallado.",
+      "too_large": "video: El video excede el tamaño máximo permitido.",
+      "metadata_failed": "video: No se pudieron leer los metadatos del video.",
+      "invalid_format": "video: El formato de video no está permitido.",
+      "empty_format": "image: El formato de video es obligatorio."
+    }
+  }
+}

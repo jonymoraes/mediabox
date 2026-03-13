@@ -1,0 +1,37 @@
+{
+  "validation": {
+    "is_string": "El valor debe ser una cadena de texto.",
+    "is_boolean": "El valor debe ser un booleano.",
+    "is_number": "El valor debe ser un número válido.",
+    "is_not_empty": "Este campo es obligatorio.",
+    "is_token": "El token proporcionado no tiene un formato válido.",
+    "invalid_slug": "El formato del slug no es válido.",
+    "slug_required": "El slug es obligatorio.",
+    "slug_too_short": "El slug debe tener al menos 3 caracteres."
+  },
+  "job_status": {
+    "messages": {
+      "processing": "Procesando...",
+      "validated": "Verificando...",
+      "preparing": "Preparando...",
+      "executing": "Ejecutando...",
+      "finalizing": "Finalizando...",
+      "completed": "Completado.",
+      "canceled": "Cancelado."
+    },
+    "errors": {
+      "required": "El estado del trabajo es obligatorio.",
+      "invalid": "El estado del trabajo proporcionado no es válido.",
+      "failed": "El trabajo ha fallado durante su ejecución.",
+      "alreadyFinalized": "La tarea ya se ha completado.",
+      "alreadyCanceled": "La tarea ya se ha cancelado."
+    }
+  },
+  "errors": {
+    "too_many_requests": "Has realizado demasiadas solicitudes. Por favor, espera un momento.",
+    "process_canceled": "El proceso ha sido cancelado.",
+    "file_system_error": "Error en la operación del sistema de archivos.",
+    "file_not_found": "Archivo no encontrado.",
+    "invalid_file_type": "Archivo no válido."
+  }
+}

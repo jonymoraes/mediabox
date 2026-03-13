@@ -1,0 +1,35 @@
+{
+  "auth": {
+    "errors": {
+      "not_authorized": "No tienes permisos para realizar esta acción.",
+      "invalid_token": "El token de acceso no es válido.",
+      "invalid_role": "El rol asignado no es válido.",
+      "invalid_status": "El estado proporcionado no es válido.",
+      "invalid_apikey_format": "El formato de la clave de API no es válido."
+    }
+  },
+  "account": {
+    "messages": {
+      "created": "La cuenta ha sido creada.",
+      "updated": "La cuenta ha sido actualizada.",
+      "deleted": "La cuenta ha sido eliminada."
+    },
+    "storage": {
+      "errors": {
+        "invalid": "El uso de almacenamiento no puede ser negativo."
+      }
+    },
+    "errors": {
+      "not_found": "La cuenta no existe.",
+      "already_exists": "Esta cuenta ya está registrada.",
+      "is_banned": "La cuenta ha sido suspendida.",
+      "invalid_domain": "El dominio proporcionado no es válido."
+    }
+  },
+  "quota": {
+    "errors": {
+      "invalid": "La cuota de transferencia proporcionada no es válida.",
+      "not_found": "No se pudo encontrar la cuota."
+    }
+  }
+}
