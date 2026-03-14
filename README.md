@@ -108,5 +108,5 @@ pnpm run test:all
 pnpm run test:watch
 
 # Test coverage
-pnpm run test:coveravge
+pnpm run test:coverage
 ```
