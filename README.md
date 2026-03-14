@@ -64,15 +64,15 @@ Ensure you have the following services running:
 ## Installation
 
 ```bash
-git clone [https://github.com/jonymoraes/mediabox.git](https://github.com/jonymoraes/mediabox.git)
+git clone https://github.com/jonymoraes/mediabox.git
 cd mediabox
-pnpm install
+pnpm install --prod
 ```
 
 ## Configuration
 
 ```bash
-cp .env.example .env
+cp .env.development .env.production
 ```
 
 ### Build and Run
@@ -101,12 +101,12 @@ pnpm run start:prod
 The project includes a comprehensive suite of tests to ensure stability and correct behavior of the storage and processing logic.
 
 ```bash
-# Run all tests with coverage
+# Run all tests
 pnpm run test:all
 
 # Run tests in watch mode
 pnpm run test:watch
 
 # Test coverage
-pnpm run test:cov
+pnpm run test:coveravge
 ```
