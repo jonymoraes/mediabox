@@ -100,7 +100,7 @@ The project includes a comprehensive suite of tests to ensure stability and corr
 
 ```bash
 # Run all tests with coverage
-pnpm run test:full
+pnpm run test:all
 
 # Run tests in watch mode
 pnpm run test:watch

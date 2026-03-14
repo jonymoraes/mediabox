@@ -12,7 +12,6 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
-    # Permisos explícitos para que la acción haga el push de los .svg
     permissions:
       contents: write
 
@@ -40,22 +39,20 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile --ignore-workspace
 
-      - name: Run Build
-        # Generamos el build para validar que el código compila (Badge: Build)
-        run: pnpm run build
-
       - name: Run Tests
-        # Forzamos json-summary para que la acción de badges tenga datos
-        run: pnpm test:cov --coverageReporters="json-summary" --coverageReporters="text"
+        run: pnpm test:cov -- --coverageReporters="json-summary" --coverageReporters="text"
         env:
           NODE_ENV: test
           REDIS_HOST: localhost
           REDIS_PORT: 6379
 
-      - name: Generate All Badges
-        # Solo generamos badges en push a ramas principales, no en cada PR (evita ruido)
+      - name: Generate Coverage Badges
+        run: npx jest-coverage-badges --input ./coverage/coverage-summary.json --output ./badges
+
+      - name: Commit and Push Badges
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-        uses: jpb06/jest-badges-action@v2.1.0
-        with:
-          coverage-summary-path: ./coverage/coverage-summary.json
-          no-pnpm: false
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add ./badges/*.svg
+          git diff --quiet && git diff --staged --quiet || (git commit -m "docs: update coverage badges [skip ci]" && git push)
