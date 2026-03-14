@@ -1,8 +1,8 @@
 # MediaBox
 
-![Version](https://img.shields.io/github/package-json/v/jonymoraes/mediabox)
-![License](https://img.shields.io/github/license/jonymoraes/mediabox)
-[![Build](https://github.com/jonymoraes/mediabox/actions/workflows/tests.yml/badge.svg)](https://github.com/jonymoraes/mediabox/actions/workflows/tests.yml)
+![version](https://img.shields.io/github/package-json/v/jonymoraes/mediabox)
+![license](https://img.shields.io/github/license/jonymoraes/mediabox)
+[![build](https://github.com/jonymoraes/mediabox/actions/workflows/tests.yml/badge.svg)](https://github.com/jonymoraes/mediabox/actions/workflows/tests.yml)
 
 **Unified Media Storage Engine: A flexible intermediary and S3-compatible bridge.** Seamlessly manage uploads, transcoding, and quotas across **Local Storage, VPS, StorageBox, or Cloud Providers.**
 
