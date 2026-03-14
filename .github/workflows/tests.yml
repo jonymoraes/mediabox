@@ -40,14 +40,28 @@ jobs:
         run: pnpm install --no-frozen-lockfile --ignore-workspace
 
       - name: Run Tests
-        run: pnpm test:cov -- --coverageReporters="json-summary" --coverageReporters="text"
+        # Quitamos la basura del CLI. Tu package.json ya tiene los reporters.
+        # Usamos 'tee' para capturar el output y extraer los tests pasados.
+        run: pnpm test:cov | tee test-output.txt
         env:
           NODE_ENV: test
           REDIS_HOST: localhost
           REDIS_PORT: 6379
 
       - name: Generate Coverage Badges
-        run: npx jest-coverage-badges --input ./coverage/coverage-summary.json --output ./badges
+        run: |
+          # Crear carpeta si no existe
+          mkdir -p ./badges
+
+          # Generar las de coverage (ya configurado en tu package.json)
+          npx jest-coverage-badges --input ./coverage/coverage-summary.json --output ./badges
+
+          # Extraer el número real de tests pasados (ej. "241")
+          PASSED=$(grep -oP '\d+(?=\s+passed)' test-output.txt | head -n 1)
+          if [ -z "$PASSED" ]; then PASSED="0"; fi
+
+          # Generar badge de tests real
+          curl -L "https://img.shields.io/badge/tests-${PASSED}%20passed-brightgreen.svg" -o ./badges/tests.svg
 
       - name: Commit and Push Badges
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
