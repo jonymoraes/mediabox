@@ -24,6 +24,7 @@ export class DeleteAccountUseCase extends DeleteAccountPort {
    * @description Delete account by id
    */
   async execute(accountId: string): Promise<{ message: string }> {
+    // Get account
     const account = await this.accountPort.findById(accountId);
     if (!account) throw new AccountNotFoundException();
 

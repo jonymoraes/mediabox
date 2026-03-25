@@ -27,6 +27,9 @@ export class ImageOptimizationWorker extends WorkerHost {
     // Process Owner
     const accountId = job.data?.accountId;
 
+    // Client
+    const client = job.data?.client;
+
     // Shared reference cancelation
     const control = { cancel: false };
 
@@ -37,9 +40,11 @@ export class ImageOptimizationWorker extends WorkerHost {
         control.cancel = true;
       }
 
-      await job.updateProgress({ percentage, stage, accountId }).catch((e) => {
-        this.logger.error(`[PROGRESS ERROR] Job ${jobId}: ${e.message}`);
-      });
+      await job
+        .updateProgress({ percentage, stage, accountId, client })
+        .catch((e) => {
+          this.logger.error(`[PROGRESS ERROR] Job ${jobId}: ${e.message}`);
+        });
     };
 
     try {
@@ -53,6 +58,7 @@ export class ImageOptimizationWorker extends WorkerHost {
       return {
         ...result,
         accountId,
+        client,
       };
     } catch (err) {
       if (job.data?.filepath) {

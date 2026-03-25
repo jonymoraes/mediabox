@@ -24,6 +24,10 @@ export class ImageGateway extends BaseGateway {
     this.registerQueueListeners();
   }
 
+  /**
+   * Registers listeners for the image optimization queue.
+   * Ensures events are routed to the specific account and tunnel (client).
+   */
   private registerQueueListeners(): void {
     if (this.eventsRegistered) return;
     this.eventsRegistered = true;
@@ -33,11 +37,16 @@ export class ImageGateway extends BaseGateway {
       const payload = (
         typeof data === 'object' ? data : { percentage: data }
       ) as any;
-      const { accountId, ...rest } = payload;
 
-      if (accountId) {
+      const { accountId, client, ...rest } = payload;
+
+      if (accountId && client) {
         this.socket
-          .toUser(accountId)
+          .toRoom(accountId, client)
+          .emit('image-progress', { jobId, ...rest });
+      } else if (accountId) {
+        this.socket
+          .toAccount(accountId)
           .emit('image-progress', { jobId, ...rest });
       } else {
         this.server.emit('image-progress', { jobId, ...rest });
@@ -52,20 +61,29 @@ export class ImageGateway extends BaseGateway {
           : { url: returnvalue }
       ) as any;
 
-      const { accountId, url } = payload;
+      const { accountId, client, url } = payload;
 
-      if (accountId) {
-        this.socket.toUser(accountId).emit('image-completed', { jobId, url });
+      if (accountId && client) {
+        this.socket
+          .toRoom(accountId, client)
+          .emit('image-completed', { jobId, url });
+      } else if (accountId) {
+        this.socket
+          .toAccount(accountId)
+          .emit('image-completed', { jobId, url });
       } else {
         this.server.emit('image-completed', { jobId, url });
       }
     });
 
-    // Removed / Failed
-    this.imageEvents.on('failed', ({ jobId }) => {
-      this.server.emit('image-canceled', { jobId });
+    // Failed / Canceled
+    this.imageEvents.on('failed', ({ jobId, failedReason }) => {
+      this.server.emit('image-failed', { jobId, reason: failedReason });
+      this.logger.error(`Job ${jobId} failed: ${failedReason}`);
     });
 
-    this.logger.log('Image queue listeners registered.');
+    this.logger.log(
+      'Image queue listeners registered with hierarchical routing.',
+    );
   }
 }

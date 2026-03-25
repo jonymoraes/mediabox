@@ -30,6 +30,7 @@ export class UpdateAccountUseCase extends UpdateAccountPort {
     accountId: string,
     dto: UpdateAccountDto,
   ): Promise<{ message: string; data: { account: AccountToDto } }> {
+    // Get account
     const account = await this.accountPort.findById(accountId);
     if (!account) throw new AccountNotFoundException();
 

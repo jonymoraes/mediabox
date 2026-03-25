@@ -3,6 +3,7 @@ import { ImageUploadPayload } from '@/src/adapters/inbound/rest/transformers/ima
 export abstract class ImageUploadPort {
   abstract execute(
     userId: string,
+    client: string,
     payload: ImageUploadPayload,
   ): Promise<{ message: string; data: { jobId: string } }>;
 }

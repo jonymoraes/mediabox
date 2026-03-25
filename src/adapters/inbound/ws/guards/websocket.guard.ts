@@ -24,11 +24,9 @@ export class WebsocketGuard {
   ) {}
 
   /**
-   * Verifies the client's API Key from handshake headers.
-   * Mirrors the logic of AuthenticateGuard for WebSockets.
-   * @param client - Socket client instance.
-   * @param mode - 'private' disconnects on failure, 'public' allows null user.
-   * @returns Account | null
+   * Verifies the client's API Key and hydrates the socket data.
+   * Extracts the roomId from headers to establish a secure tunnel.
+   * Updates transfer quotas on successful connection.
    */
   async verifyApiKey(
     client: Socket,
@@ -39,40 +37,41 @@ export class WebsocketGuard {
         | string
         | undefined;
 
-      if (!apiKey) {
-        throw new InvalidTokenException();
-      }
+      const clientId = client.handshake.headers['x-media-client'] as
+        | string
+        | undefined;
+
+      if (!apiKey) throw new InvalidTokenException();
 
       const account = await this.accountPort.findByApiKey(apiKey);
-      if (!account) {
-        throw new InvalidTokenException();
-      }
+      if (!account) throw new InvalidTokenException();
 
-      if (!account.isActive()) {
-        throw new NotAuthorizedException();
-      }
+      if (!account.isActive()) throw new NotAuthorizedException();
 
+      // Update transfer quota
       const quota = await this.quotaPort.findByAccountId(account.id);
       if (quota) {
         quota.addTransfer(BigInt(0));
         await this.quotaPort.save(quota);
       }
 
+      // Hydrate client data for Gateway use including the tunnel roomId
       client.data.user = {
         id: account.id,
-        role: account.role,
+        role: account.role.value,
+        client: clientId,
       };
 
       return account;
     } catch (error) {
       const reason =
-        error instanceof DomainException ? error.message : 'Unauthorized';
+        error instanceof DomainException ? error.key : 'Unauthorized';
       return this.handleFailure(client, mode, reason);
     }
   }
 
   /**
-   * Internal handler for verification failures based on guard mode.
+   * Internal handler for verification failures.
    */
   private handleFailure(
     client: Socket,

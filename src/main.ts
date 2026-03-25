@@ -99,7 +99,8 @@ async function bootstrap() {
     }),
   );
 
-  app.setGlobalPrefix('api');
+  // Set global prefix
+  app.setGlobalPrefix(process.env.PREFIX || '');
 
   // Listen
   const port = configService.get<number>('PORT') || 4200;

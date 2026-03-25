@@ -31,21 +31,26 @@ export class CreateAccountUseCase extends CreateAccountPort {
   public async execute(
     dto: CreateAccountDto,
   ): Promise<{ message: string; data: { apikey: string } }> {
+    // Get account
     const existing = await this.accountPort.findByDomain(dto.domain);
     if (existing) throw new AccountAlreadyExistsException();
 
+    // Create account
     const account = Account.create({
       name: dto.name,
       domain: dto.domain,
       role: Role.user(),
     });
 
+    // Validate storage path
     if (account.storagePath) {
       ensureDir(account.storagePath);
     }
 
+    // Persist
     const savedAccount = await this.accountPort.save(account);
 
+    // Create & persist quota
     const quota = Quota.create({ accountId: savedAccount.id });
     await this.quotaPort.save(quota);
 

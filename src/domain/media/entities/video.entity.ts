@@ -111,9 +111,6 @@ export class Video {
     return new Date() > this._expiresAt;
   }
 
-  /**
-   * Unpacks the entity into a plain object (useful for mappers).
-   */
   public unpack(): VideoProps {
     return {
       id: this._id,

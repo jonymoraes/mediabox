@@ -10,4 +10,5 @@ export type VideoTranscoding = {
   format: string;
   accountId: string;
   quotaId: string;
+  client: string;
 };

@@ -1,20 +1,9 @@
 {
   "name": "mediabox",
   "version": "1.0.0",
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@nestjs/core",
-      "@swc/core",
-      "cpu-features",
-      "msgpackr-extract",
-      "protobufjs",
-      "sharp",
-      "ssh2"
-    ]
-  },
   "description": "Unified Media Storage Engine: A flexible intermediary and S3-compatible bridge. Seamlessly manage uploads, transcoding, and quotas across Local Storage, VPS, StorageBox, or Cloud Providers",
-  "author": "jonymoraes",
-  "private": false,
+  "author": "Jony Moraes",
+  "private": true,
   "license": "MIT",
   "scripts": {
     "flush-cache": "ts-node scripts/flush-cache.ts redis",
@@ -110,6 +99,17 @@
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.20.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "@swc/core",
+      "cpu-features",
+      "msgpackr-extract",
+      "protobufjs",
+      "sharp",
+      "ssh2"
+    ]
   },
   "jest": {
     "moduleFileExtensions": [

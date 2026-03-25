@@ -47,7 +47,11 @@ export class VideoController {
     @User() user: Session,
     @Query(VideoUploadPipe) payload: VideoUploadPayload,
   ) {
-    return await this.videoUploadUseCase.execute(user.sub, payload);
+    return await this.videoUploadUseCase.execute(
+      user.sub,
+      user.client,
+      payload,
+    );
   }
 
   /**

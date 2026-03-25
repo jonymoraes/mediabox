@@ -44,11 +44,13 @@ export class ImageUploadUseCase extends ImageUploadPort {
   /**
    * @description Handles image upload: validates account, quota, saves file and DB entry
    * @param userId User ID from session
+   * @param client Client ID from backend
    * @param file MultipartFile with buffer
    * @param context Optional context/purpose
    */
   async execute(
     userId: string,
+    client: string,
     payload: ImageUploadPayload,
   ): Promise<{ message: string; data: { jobId: string } }> {
     const { file, context } = payload;
@@ -70,7 +72,7 @@ export class ImageUploadUseCase extends ImageUploadPort {
     // Save file to disk
     const sizeInBytes = saveFileToDisk(filePath, (file as any).buffer);
 
-    // Add to optimization queue
+    // Add task to BullMQ
     const job = await this.optimizationQueue.add('optimize', {
       filename: finalName,
       filepath: filePath,
@@ -79,13 +81,14 @@ export class ImageUploadUseCase extends ImageUploadPort {
       context,
       accountId: account.id,
       quotaId: quota.id,
+      client: client,
     });
 
     // Validate queue
     if (!job.id) throw new FileSystemException();
     const jobId = String(job.id);
 
-    // Create optimization
+    // Create optimization entry
     const optimization: ImageOptimization = {
       taskId: jobId,
       status: OptimizationStatus.fromString(OptimizationStatusType.PENDING),
@@ -96,9 +99,10 @@ export class ImageUploadUseCase extends ImageUploadPort {
       context: context,
       accountId: account.id,
       quotaId: quota.id,
+      client: client,
     };
 
-    // Save
+    // Persist
     await this.imagePort.saveOptimization(optimization);
 
     return {

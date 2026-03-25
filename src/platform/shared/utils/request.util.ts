@@ -5,8 +5,8 @@ import { SessionRequest } from '@/src/adapters/inbound/rest/interfaces/auth.inte
  * Returns user ID if authenticated, otherwise falls back to network IP.
  */
 export const sessionKey = (req: SessionRequest): string => {
-  if (req.user?.sub) {
-    return `user:${req.user.sub}`;
+  if (req.account?.sub) {
+    return `user:${req.account.sub}`;
   }
 
   return `ip:${req.ip}`;

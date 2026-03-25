@@ -69,6 +69,10 @@ export class Image {
     return this._status;
   }
 
+  get accountId(): string {
+    return this._accountId;
+  }
+
   public activate(): void {
     this._status = MediaStatus.active();
     this._expiresAt = undefined;

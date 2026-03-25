@@ -1,81 +1,71 @@
 import { Server, Socket } from 'socket.io';
 
 /**
- * @file socket.helper.ts
- * @description Fluent helper for socket emission per Gateway
+ * Fluent helper for socket emission using native Rooms for scalability.
+ * Replaces manual iteration over Map with Socket.io optimized internal targeting.
  */
 export class WebsocketRelay {
   private server: Server;
-  private usersMap: Map<string, Set<Socket>>;
-  private targetUserId?: string | number; // Cambiado a string | number
-  private targetRole?: string;
+  private targetRoom?: string;
 
-  constructor(server: Server, usersMap: Map<string, Set<Socket>>) {
+  constructor(server: Server) {
     this.server = server;
-    this.usersMap = usersMap;
   }
 
   /**
-   * @description Emit to a specific user
-   * @param userId User ID (UUID or Number)
+   * Targets a specific tunnel (User/Session) within a specific account.
+   * Format: room:accountId:client
    */
-  toUser(userId: string | number) {
-    this.targetUserId = userId;
+  public toRoom(accountId: string | number, client: string | number): this {
+    this.targetRoom = `room:${accountId}:${client}`;
     return this;
   }
 
   /**
-   * @description Emit to all users
+   * Targets all connections belonging to a specific account/backend.
+   * Format: account:accountId
    */
-  toAll() {
-    this.targetUserId = undefined;
+  public toAccount(accountId: string | number): this {
+    this.targetRoom = `account:${accountId}`;
     return this;
   }
 
   /**
-   * @description Emit to all users with a specific role
-   * @param role Role name
+   * Targets a specific role's room.
    */
-  toRole(role: string) {
-    this.targetRole = role;
+  public toRole(role: string): this {
+    this.targetRoom = `role:${role}`;
     return this;
   }
 
   /**
-   * @description Emit to a specific user, all users, or all users with a specific role
+   * Resets the target to broadcast to everyone in the namespace.
    */
-  emit(event: string, payload: any) {
-    if (!payload) return;
+  public toAll(): this {
+    this.targetRoom = undefined;
+    return this;
+  }
 
-    if (this.targetUserId !== undefined) {
-      // Emit to a specific user
-      const sockets = this.usersMap.get(String(this.targetUserId));
-      sockets?.forEach((socket) => {
-        if (this.targetRole && socket.data.user?.role !== this.targetRole)
-          return;
-        socket.emit(event, payload);
-      });
-    } else if (this.targetRole) {
-      // Emit to all users with a specific role
-      for (const sockets of this.usersMap.values()) {
-        sockets.forEach((socket) => {
-          if (socket.data.user?.role !== this.targetRole) return;
-          socket.emit(event, payload);
-        });
-      }
+  /**
+   * Executes the emission to the targeted room or the entire namespace.
+   */
+  public emit(event: string, payload: any): void {
+    if (payload === undefined || payload === null) return;
+
+    if (this.targetRoom) {
+      this.server.to(this.targetRoom).emit(event, payload);
     } else {
-      // Emit to all users
       this.server.emit(event, payload);
     }
 
-    this.targetUserId = undefined;
-    this.targetRole = undefined;
+    // Reset state for subsequent calls
+    this.targetRoom = undefined;
   }
 
   /**
-   * @description Disconnects a client with an error message
+   * Disconnects a client with an error message.
    */
-  static disconnect(socket: Socket, reason: string) {
+  public static disconnect(socket: Socket, reason: string): void {
     socket.emit('error', { message: reason });
     socket.disconnect(true);
   }

@@ -22,11 +22,11 @@ export class UpdateTransferUseCase extends UpdateTransferPort {
     accountId: string,
     fileSizeInBytes: bigint,
   ): Promise<void> {
-    // Verify account existence
+    // Get account
     const account = await this.accountPort.findById(accountId);
     if (!account) throw new AccountNotFoundException();
 
-    // Find quota by accountId
+    // Get quota
     const quota = await this.quotaPort.findByAccountId(account.id);
     if (!quota) throw new QuotaNotFoundException();
 

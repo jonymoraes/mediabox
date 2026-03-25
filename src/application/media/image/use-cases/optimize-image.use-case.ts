@@ -48,24 +48,35 @@ export class OptimizeImageUseCase extends OptimizeImagePort {
     onProgress: (percentage: number, stage: string) => Promise<void>,
     control: { cancel: boolean },
   ): Promise<{ success: boolean; jobId: string; url: string }> {
-    const { filename, filepath, filesize, context, accountId, quotaId } = data;
+    const {
+      filename,
+      filepath,
+      filesize,
+      context,
+      accountId,
+      quotaId,
+      client,
+    } = data;
 
-    // Quota update
+    // Get quota
     const quota = await this.quotaPort.findById(quotaId);
     if (!quota) throw new QuotaNotFoundException();
+
+    // Update transfer
     quota.addTransfer(BigInt(filesize));
     await this.quotaPort.save(quota);
 
-    // Initial status update
+    // Mark image as processing
     await this.imagePort.markOptimizationProcessing(jobId);
     await onProgress(10, this.i18n.t('shared.job_status.messages.processing'));
 
+    // Get account
     const account = await this.accountPort.findById(accountId);
     if (!account) throw new AccountNotFoundException();
     await onProgress(30, this.i18n.t('shared.job_status.messages.validated'));
 
     // Emit account updates
-    this.accountGateway.emitUpdated(AccountToDto.fromDomain(account));
+    this.accountGateway.emitUpdated(AccountToDto.fromDomain(account), client);
 
     // Get dimensions
     const { width, height } = Sizes[context] || Sizes[Context.GENERIC];
@@ -93,8 +104,11 @@ export class OptimizeImageUseCase extends OptimizeImagePort {
       quotas: [quota],
     });
 
-    // Emit account updates
-    this.accountGateway.emitUpdated(AccountToDto.fromDomain(accountWithQuotas));
+    // Emit new account updates
+    this.accountGateway.emitUpdated(
+      AccountToDto.fromDomain(accountWithQuotas),
+      client,
+    );
 
     // Generate URL
     const url = `${process.env.STATIC}/${account.folder}/${filename}`;
@@ -109,7 +123,7 @@ export class OptimizeImageUseCase extends OptimizeImagePort {
       expiresAt: addDays(new Date(), 1),
     });
 
-    // Persist image
+    // Persist
     await this.imagePort.save(image);
     await onProgress(100, this.i18n.t('shared.job_status.messages.completed'));
 

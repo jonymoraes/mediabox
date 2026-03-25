@@ -9,8 +9,8 @@ export const User = createParamDecorator(
   (
     _data: unknown,
     context: ExecutionContext,
-  ): { sub: string; role: Role } | undefined => {
+  ): { sub: string; role: Role; client?: string } | undefined => {
     const req = context.switchToHttp().getRequest<SessionRequest>();
-    return req.user;
+    return req.account;
   },
 );

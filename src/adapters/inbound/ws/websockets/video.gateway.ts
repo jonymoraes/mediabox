@@ -33,11 +33,16 @@ export class VideoGateway extends BaseGateway {
       const payload = (
         typeof data === 'object' ? data : { percentage: data }
       ) as any;
-      const { accountId, ...rest } = payload;
 
-      if (accountId) {
+      const { accountId, client, ...rest } = payload;
+
+      if (accountId && client) {
         this.socket
-          .toUser(accountId)
+          .toRoom(accountId, client)
+          .emit('video-progress', { jobId, ...rest });
+      } else if (accountId) {
+        this.socket
+          .toAccount(accountId)
           .emit('video-progress', { jobId, ...rest });
       } else {
         this.server.emit('video-progress', { jobId, ...rest });
@@ -52,20 +57,29 @@ export class VideoGateway extends BaseGateway {
           : { url: returnvalue }
       ) as any;
 
-      const { accountId, url } = payload;
+      const { accountId, client, url } = payload;
 
-      if (accountId) {
-        this.socket.toUser(accountId).emit('video-completed', { jobId, url });
+      if (accountId && client) {
+        this.socket
+          .toRoom(accountId, client)
+          .emit('video-completed', { jobId, url });
+      } else if (accountId) {
+        this.socket
+          .toAccount(accountId)
+          .emit('video-completed', { jobId, url });
       } else {
         this.server.emit('video-completed', { jobId, url });
       }
     });
 
-    // Removed / Failed
-    this.videoEvents.on('failed', ({ jobId }) => {
-      this.server.emit('video-canceled', { jobId });
+    // Failed
+    this.videoEvents.on('failed', ({ jobId, failedReason }) => {
+      this.server.emit('video-failed', { jobId, reason: failedReason });
+      this.logger.error(`Video job ${jobId} failed: ${failedReason}`);
     });
 
-    this.logger.log('Video queue listeners registered.');
+    this.logger.log(
+      'Video queue listeners registered with hierarchical routing.',
+    );
   }
 }

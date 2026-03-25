@@ -15,15 +15,18 @@ export class AccountGateway extends BaseGateway {
   }
 
   /**
-   * @description Emit an AccountToDto only to the specific account owner
+   * @description Emit an AccountToDto only to the specific tunnel (Account + Room)
    * @param account Account DTO to emit
+   * @param roomId Specific tunnel identifier for the session
    */
-  emitUpdated(account: AccountToDto) {
-    if (!account?.id) return;
+  emitUpdated(account: AccountToDto, client: string) {
+    if (!account?.id || !client) return;
 
-    // Emit to account owner
-    this.socket.toUser(account.id).emit('account-updated', account);
+    // Emit to room: room:accountId:roomId
+    this.socket.toRoom(account.id, client).emit('account-updated', account);
 
-    this.logger.log(`Emitted account-updated to account: ${account.id}`);
+    this.logger.log(
+      `Emitted account-updated to account: ${account.id} inside room: ${client}`,
+    );
   }
 }

@@ -27,8 +27,9 @@ export class AuthorizeGuard implements CanActivate {
    */
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<SessionRequest>();
+    const client = req.headers['x-media-client'] as string | undefined;
 
-    if (!req.user) {
+    if (!req.account) {
       throw new InvalidTokenException();
     }
 
@@ -43,7 +44,7 @@ export class AuthorizeGuard implements CanActivate {
       return true;
     }
 
-    const account = await this.accountPort.findById(req.user.sub);
+    const account = await this.accountPort.findById(req.account.sub);
 
     if (!account || !account.id) {
       throw new InvalidTokenException();
@@ -56,10 +57,13 @@ export class AuthorizeGuard implements CanActivate {
       throw new NotAuthorizedException();
     }
 
+    if (!client) throw new NotAuthorizedException();
+
     // Update request user with fresh domain data
-    req.user = {
+    req.account = {
       sub: account.id,
       role: account.role,
+      client: client,
     };
 
     return true;

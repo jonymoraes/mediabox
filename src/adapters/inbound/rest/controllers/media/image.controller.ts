@@ -45,7 +45,11 @@ export class ImageController {
     @User() user: Session,
     @Query(ImageUploadPipe) payload: ImageUploadPayload,
   ) {
-    return await this.imageUploadUseCase.execute(user.sub, payload);
+    return await this.imageUploadUseCase.execute(
+      user.sub,
+      user.client,
+      payload,
+    );
   }
 
   /**

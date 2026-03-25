@@ -46,7 +46,6 @@ export class GetAccountListUseCase extends GetAccountListPort {
       meta: buildPagination(totalItems, page, limit),
     };
 
-    // Perform final transformation to fromPaginatedResult
     return PaginationToDto.fromPaginatedResult(paginatedResult, (account) =>
       AccountToDto.fromDomain(account),
     );

@@ -43,6 +43,7 @@ export class VideoUploadUseCase extends VideoUploadPort {
 
   async execute(
     userId: string,
+    client: string,
     payload: VideoUploadPayload,
   ): Promise<{ message: string; data: { jobId: string } }> {
     const { file, format } = payload;
@@ -55,13 +56,13 @@ export class VideoUploadUseCase extends VideoUploadPort {
     const quota = await this.quotaPort.findByAccountId(account.id);
     if (!quota) throw new QuotaNotFoundException();
 
-    // Prepare physical storage
+    // Prepare upload
     const { filePath, finalName } = prepareFilePath(
       account.storagePath,
       file.filename,
     );
 
-    // Persist raw file to disk before transcoding
+    // Save file to disk
     const sizeInBytes = saveFileToDisk(filePath, (file as any).buffer);
 
     // Add task to BullMQ
@@ -73,12 +74,14 @@ export class VideoUploadUseCase extends VideoUploadPort {
       format,
       accountId: account.id,
       quotaId: quota.id,
+      client: client,
     });
 
+    // Validate queue
     if (!job.id) throw new FileSystemException();
     const jobId = String(job.id);
 
-    // Persist transcoding task
+    // Create transcoding entry
     const transcoding: VideoTranscoding = {
       taskId: jobId,
       status: TranscodingStatus.fromString(TranscodingStatusType.PENDING),
@@ -89,9 +92,10 @@ export class VideoUploadUseCase extends VideoUploadPort {
       format,
       accountId: account.id,
       quotaId: quota.id,
+      client: client,
     };
 
-    // Save to DB
+    // Persist
     await this.videoPort.saveTranscoding(transcoding);
 
     return {

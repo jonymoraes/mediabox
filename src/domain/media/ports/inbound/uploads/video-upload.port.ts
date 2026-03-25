@@ -3,6 +3,7 @@ import { VideoUploadPayload } from '@/src/adapters/inbound/rest/transformers/vid
 export abstract class VideoUploadPort {
   abstract execute(
     userId: string,
+    client: string,
     payload: VideoUploadPayload,
   ): Promise<{ message: string; data: { jobId: string } }>;
 }

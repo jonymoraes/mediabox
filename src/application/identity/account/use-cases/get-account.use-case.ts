@@ -17,6 +17,7 @@ export class GetAccountUseCase extends GetAccountPort {
   }
 
   async execute(accountId: string): Promise<{ account: AccountToDto }> {
+    // Get account
     const account = await this.accountPort.findById(accountId);
     if (!account) throw new AccountNotFoundException();
 

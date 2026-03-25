@@ -56,15 +56,18 @@ export class TranscodeVideoUseCase extends TranscodeVideoPort {
     onProgress: (percentage: number, stage: string) => Promise<void>,
     control: { cancel: boolean },
   ): Promise<{ success: boolean; jobId: string; url: string }> {
-    const { filename, filepath, filesize, format, accountId, quotaId } = data;
+    const { filename, filepath, filesize, format, accountId, quotaId, client } =
+      data;
 
-    // Quota update
+    // Get quota
     const quota = await this.quotaPort.findById(quotaId);
     if (!quota) throw new QuotaNotFoundException();
+
+    // Update transfer
     quota.addTransfer(BigInt(filesize));
     await this.quotaPort.save(quota);
 
-    // Initial status update
+    // Mark video as processing
     await this.videoPort.markTranscodingProcessing(jobId);
     await onProgress(5, this.i18n.t('shared.job_status.messages.processing'));
 
@@ -74,9 +77,9 @@ export class TranscodeVideoUseCase extends TranscodeVideoPort {
     await onProgress(8, this.i18n.t('shared.job_status.messages.validated'));
 
     // Emit account updates
-    this.accountGateway.emitUpdated(AccountToDto.fromDomain(account));
+    this.accountGateway.emitUpdated(AccountToDto.fromDomain(account), client);
 
-    // Get file paths
+    // Generate file paths
     const outputPath = generateOutputFilePath(filepath, filename, format);
 
     // Get video duration
@@ -89,7 +92,7 @@ export class TranscodeVideoUseCase extends TranscodeVideoPort {
     //  Get codecs
     const { videoCodec, audioCodec } = Codecs[format as Format];
 
-    // Transcode video using shared helper
+    // Transcode video
     await transcodeVideo({
       input: filepath,
       output: outputPath,
@@ -118,16 +121,16 @@ export class TranscodeVideoUseCase extends TranscodeVideoPort {
     if (outputPath !== filepath && existsSync(filepath))
       await fs.unlink(filepath);
 
-    //  Get transcoded filesize
+    // Get transcoded filesize
     const { size: transcodedFilesize } = await fs.stat(outputPath);
 
-    //  Get output mimetype
+    // Get output mimetype
     const outputMimetype = getMimeType(format);
 
-    //  Get relative path
+    // Get relative path
     const relativePath = outputPath.split(`${process.env.PUBLIC_DIR}/`).pop();
 
-    //  Generate url
+    // Generate url
     const url = `${process.env.STATIC}/${account.folder}/${basename(relativePath!)}`;
     await onProgress(90, this.i18n.t('shared.job_status.messages.finalizing'));
 
@@ -141,7 +144,7 @@ export class TranscodeVideoUseCase extends TranscodeVideoPort {
       expiresAt: addDays(new Date(), 1),
     });
 
-    //  Save video entry
+    // Persist video
     await this.videoPort.save(video);
 
     // Storage accounting
@@ -154,9 +157,11 @@ export class TranscodeVideoUseCase extends TranscodeVideoPort {
       quotas: [quota],
     });
 
-    // Emit account updates
-    this.accountGateway.emitUpdated(AccountToDto.fromDomain(accountWithQuotas));
-
+    // Emit new account updates
+    this.accountGateway.emitUpdated(
+      AccountToDto.fromDomain(accountWithQuotas),
+      client,
+    );
     await onProgress(100, this.i18n.t('shared.job_status.messages.completed'));
 
     return {

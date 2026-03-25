@@ -11,12 +11,11 @@ import { WebsocketRelay } from '../relays/websocket.relay';
 export abstract class BaseGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
-  protected readonly usersMap: Map<string, Set<Socket>> = new Map();
-  protected readonly logger: Logger;
-  protected readonly mode: 'public' | 'private';
-
   @WebSocketServer()
   protected server: Server;
+
+  protected readonly logger: Logger;
+  protected readonly mode: 'public' | 'private';
 
   constructor(
     protected readonly guard: WebsocketGuard,
@@ -27,33 +26,49 @@ export abstract class BaseGateway
     this.mode = mode;
   }
 
+  /**
+   * Provides a fluent relay for broadcasting using native Rooms.
+   */
   protected get socket(): WebsocketRelay {
     if (!this.server) throw new Error('Server not initialized yet');
-    return new WebsocketRelay(this.server, this.usersMap);
+    return new WebsocketRelay(this.server);
   }
 
   /**
-   * @description Handles new WebSocket connections.
-   * Authenticates via API Key through the WebsocketGuard.
+   * Handles incoming connections, API Key verification, and hierarchical room assignment.
    */
   async handleConnection(client: Socket) {
     const account = await this.guard.verifyApiKey(client, this.mode);
 
+    // Guard check for private gateways
     if (!account && this.mode === 'private') {
-      this.logger.log(`Anonymous client tried to connect: ${client.id}`);
+      this.logger.log(`Anonymous client rejected: ${client.id}`);
       return;
     }
 
-    const accountId = account?.id ? String(account.id) : null;
+    // Join Global Room by mode
+    const globalRoom = `mode:${this.mode}`;
+    await client.join(globalRoom);
 
-    if (accountId) {
-      if (!this.usersMap.has(accountId))
-        this.usersMap.set(accountId, new Set());
-      this.usersMap.get(accountId)!.add(client);
+    if (account) {
+      const accountId = String(account.id);
+      const roomId = client.data.user?.client;
+
+      // Join Account-based Room (All connections for this backend)
+      await client.join(`account:${accountId}`);
+
+      // Join Identity-based Tunnel Room (Account + User Session)
+      if (roomId) {
+        await client.join(`room:${accountId}:${roomId}`);
+      }
+
+      // Join Role-based Room
+      if (account.role) {
+        await client.join(`role:${account.role.value}`);
+      }
+
       this.logger.log(
-        `account ${accountId} connected with socket ${client.id} (total ${
-          this.usersMap.get(accountId)!.size
-        })`,
+        `Account ${accountId} connected (Room: ${roomId ?? 'none'}). Socket: ${client.id} joined ${globalRoom}`,
       );
     } else {
       this.logger.log(
@@ -61,38 +76,30 @@ export abstract class BaseGateway
       );
     }
 
+    // Handle Custom Query Rooms
     const room = client.handshake.query.room as string | undefined;
     if (room) {
-      void client.join(room);
-      this.logger.log(`Client ${client.id} joined room ${room}`);
+      await client.join(room);
+      this.logger.log(`Client ${client.id} joined custom room: ${room}`);
     }
   }
 
   /**
-   * @description Handles client disconnection and cleans up maps/rooms.
+   * Handles disconnections. Native rooms are cleaned up automatically.
    */
   handleDisconnect(client: Socket) {
-    const accountId = client.data?.user?.id
+    const roomId = client.data?.user?.id
       ? String(client.data.user.id)
-      : null;
+      : 'Anonymous';
 
     const room = client.handshake.query.room as string | undefined;
     if (room) {
-      void client.leave(room);
       this.server.to(room).emit('user-left', {
         message: `User left: ${client.id}`,
+        account: client.data?.user?.id,
       });
-      this.logger.log(`Client ${client.id} left room ${room}`);
     }
 
-    if (!accountId || !this.usersMap.has(accountId)) return;
-
-    const sockets = this.usersMap.get(accountId)!;
-    sockets.delete(client);
-    if (sockets.size === 0) this.usersMap.delete(accountId);
-
-    this.logger.log(
-      `account ${accountId} disconnected socket ${client.id} (remaining ${sockets.size})`,
-    );
+    this.logger.log(`Client ${client.id} (${roomId}) disconnected`);
   }
 }

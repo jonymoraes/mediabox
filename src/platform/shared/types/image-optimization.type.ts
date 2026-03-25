@@ -10,4 +10,5 @@ export type ImageOptimization = {
   context: string;
   accountId: string;
   quotaId: string;
+  client: string;
 };

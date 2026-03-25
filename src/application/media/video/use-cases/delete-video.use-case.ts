@@ -41,7 +41,7 @@ export class DeleteVideoUseCase extends DeleteVideoPort {
     const video = await this.videoPort.findByFilename(filename, account.id);
     if (!video || !video.id) throw new FileNotFoundException();
 
-    // filePath
+    // Assemble filePath
     const fullPath = join(account.storagePath, video.filename);
 
     // Delete video file

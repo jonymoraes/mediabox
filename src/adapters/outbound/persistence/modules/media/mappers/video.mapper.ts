@@ -2,6 +2,9 @@ import { Video as VideoOrm } from '../entities/video.entity-orm';
 import { Video as VideoDomain } from '@/src/domain/media/entities/video.entity';
 
 export class VideoMapper {
+  /**
+   * Rehydrates Domain Entity from Persistence
+   */
   static toDomain(orm: VideoOrm): VideoDomain {
     return VideoDomain.load({
       id: orm.id,
@@ -17,6 +20,9 @@ export class VideoMapper {
     });
   }
 
+  /**
+   * Prepares Persistence Data from Domain Entity
+   */
   static toPersistence(domain: VideoDomain): Partial<VideoOrm> {
     const props = domain.unpack();
     return {
