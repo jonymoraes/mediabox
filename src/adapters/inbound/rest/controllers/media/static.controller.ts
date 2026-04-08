@@ -35,8 +35,6 @@ export class StaticController {
     const root = join(process.cwd(), 'public');
     const filePath = join(root, path);
 
-    console.log('static');
-
     //  Validate file
     if (!existsSync(filePath)) throw new FileNotFoundException();
 

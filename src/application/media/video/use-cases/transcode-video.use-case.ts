@@ -131,7 +131,7 @@ export class TranscodeVideoUseCase extends TranscodeVideoPort {
     const relativePath = outputPath.split(`${process.env.PUBLIC_DIR}/`).pop();
 
     // Generate url
-    const url = `${process.env.STATIC}/${account.folder}/${basename(relativePath!)}`;
+    const url = `${account.domain}/static/${basename(relativePath!)}`;
     await onProgress(90, this.i18n.t('shared.job_status.messages.finalizing'));
 
     // Create video entry

@@ -111,7 +111,7 @@ export class OptimizeImageUseCase extends OptimizeImagePort {
     );
 
     // Generate URL
-    const url = `${process.env.STATIC}/${account.folder}/${filename}`;
+    const url = `${account.domain}/static/${filename}`;
 
     // Create image entry
     const image = ImageEntity.create({

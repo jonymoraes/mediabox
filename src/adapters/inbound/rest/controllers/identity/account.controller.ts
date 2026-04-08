@@ -54,8 +54,6 @@ export class AccountController {
 
   /**
    * @description Get accounts
-   * @param page? - Default: 1
-   * @param limit? - Default: 10
    */
   @UseGuards(AuthenticateGuard, AuthorizeGuard)
   @Authorize(RoleType.ADMIN)
@@ -68,7 +66,6 @@ export class AccountController {
 
   /**
    * @description Creates a new account
-   * @param dto CreateAccountDto
    */
   @Post()
   async create(
@@ -79,8 +76,6 @@ export class AccountController {
 
   /**
    * @description Update account
-   * @param name?
-   * @param domain?
    */
   @UseGuards(AuthenticateGuard)
   @Patch()

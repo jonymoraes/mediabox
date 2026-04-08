@@ -36,15 +36,13 @@ export class ImageController {
 
   /**
    * @description Uploads image and starts the optimization process
-   * @param file
-   * @param context
    */
   @UseGuards(AuthenticateGuard)
   @Post()
   async upload(
     @User() user: Session,
     @Query(ImageUploadPipe) payload: ImageUploadPayload,
-  ) {
+  ): Promise<{ message: string; data: { jobId: string } }> {
     return await this.imageUploadUseCase.execute(
       user.sub,
       user.client,
@@ -54,7 +52,6 @@ export class ImageController {
 
   /**
    * @description Cancel image process
-   * @param jobId
    */
   @UseGuards(AuthenticateGuard)
   @Post(':jobId')
@@ -64,8 +61,6 @@ export class ImageController {
 
   /**
    * @description Updates image status
-   * @param filename
-   * @param user User ID from session
    */
   @UseGuards(AuthenticateGuard)
   @Patch(':filename')
@@ -75,7 +70,6 @@ export class ImageController {
 
   /**
    * @description Delete image
-   * @param filename
    */
   @UseGuards(AuthenticateGuard)
   @Delete(':filename')

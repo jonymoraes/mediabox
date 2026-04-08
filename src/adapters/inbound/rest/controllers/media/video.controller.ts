@@ -38,8 +38,6 @@ export class VideoController {
 
   /**
    * @description Uploads video and starts the transcoding process
-   * @param file
-   * @param format
    */
   @UseGuards(AuthenticateGuard)
   @Post()
@@ -66,8 +64,6 @@ export class VideoController {
 
   /**
    * @description Updates video status
-   * @param filename
-   * @param user User ID from session
    */
   @UseGuards(AuthenticateGuard)
   @Patch(':filename')
@@ -77,7 +73,6 @@ export class VideoController {
 
   /**
    * @description Deletes video
-   * @param filename
    */
   @UseGuards(AuthenticateGuard)
   @Delete(':filename')

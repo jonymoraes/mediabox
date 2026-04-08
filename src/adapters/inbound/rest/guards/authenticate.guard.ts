@@ -31,8 +31,7 @@ export class AuthenticateGuard implements CanActivate {
     const apiKey = req.headers['x-media-key'] as string | undefined;
     const client = req.headers['x-media-client'] as string | undefined;
 
-    if (!apiKey) throw new InvalidTokenException();
-    if (!client) throw new InvalidTokenException();
+    if (!apiKey || !client) throw new InvalidTokenException();
 
     try {
       const account = await this.accountPort.findByApiKey(apiKey);
